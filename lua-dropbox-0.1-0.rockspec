@@ -2,7 +2,7 @@ rockspec_format = "1.0"
 package = "lua-dropbox"
 version = "0.1-0"
 source = {
-  url = "git://github.com/JakobGreen/lua-requests.git"
+  url = "git://github.com/loui77/lua-dropbox.git"
 }
 description = {
   summary = "A wrapper for Dropbox API v2",

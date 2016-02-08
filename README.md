@@ -2,7 +2,7 @@ lua-dropbox
 ====
 [![License](http://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
 [![Travis](https://img.shields.io/travis/louis77/lua-dropbox.svg)]()
-[![Coverage Status](https://coveralls.io/repos/louis77/lua-dropbox/badge.svg?branch=master&service=github)](https://coveralls.io/github/louis77/lua-dropbox?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/louis77/lua-dropbox/badge.svg?branch=master)](https://coveralls.io/github/louis77/lua-dropbox?branch=master)
 
 
 A non-official wrapper around Dropbox API v2
