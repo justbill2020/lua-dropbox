@@ -1,6 +1,7 @@
 lua-dropbox
 ====
 [![License](http://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
+[![Travis](https://img.shields.io/travis/louis77/lua-dropbox.svg)]()
 [![Coverage Status](https://coveralls.io/repos/louis77/lua-dropbox/badge.svg?branch=master&service=github)](https://coveralls.io/github/louis77/lua-dropbox?branch=master)
 
 
@@ -25,7 +26,7 @@ The rest of the API documentation is on the [doc](http://github.com/louis77/lua-
 Dependencies
 ====
 
-todo
+ 	- Lua 5.1, 5.2, LuaJit 2.0, LuaJit 2.1
 
 
 Tests
