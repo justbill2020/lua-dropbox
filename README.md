@@ -2,8 +2,6 @@ lua-dropbox
 ====
 [![License](http://img.shields.io/badge/License-MIT-brightgreen.svg)](LICENSE)
 [![Travis](https://img.shields.io/travis/louis77/lua-dropbox.svg)]()
-[![Coverage Status](https://coveralls.io/repos/github/louis77/lua-dropbox/badge.svg?branch=master)](https://coveralls.io/github/louis77/lua-dropbox?branch=master)
-
 
 A non-official wrapper around Dropbox API v2
 
@@ -18,9 +16,10 @@ Usage
 
 	> dropbox = require('dropbox')
   > dropbox.set_token "PUT_YOUR_ACCESS_TOKEN_HERE"
-	> response = dropbox.create_folder('/new_folder')
 
-The rest of the API documentation is on the [doc](http://github.com/louis77/lua-dropbox/doc) page.
+
+For the full set of features consult the [documentation](http://louis77.github.io/lua-dropbox/) page.
+
 
 
 Dependencies
