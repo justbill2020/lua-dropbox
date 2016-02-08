@@ -1,0 +1,320 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<head>
+    <title>Reference</title>
+    <link rel="stylesheet" href="ldoc.css" type="text/css" />
+</head>
+<body>
+
+<div id="container">
+
+<div id="product">
+	<div id="product_logo"></div>
+	<div id="product_name"><big><b></b></big></div>
+	<div id="product_description"></div>
+</div> <!-- id="product" -->
+
+
+<div id="main">
+
+
+<!-- Menu -->
+
+<div id="navigation">
+<br/>
+<h1>ldoc</h1>
+
+
+<h2>Contents</h2>
+<ul>
+<li><a href="#Functions">Functions</a></li>
+</ul>
+
+
+<h2>Modules</h2>
+<ul class="$(kind=='Topics' and '' or 'nowrap'">
+  <li><strong>dropbox</strong></li>
+</ul>
+
+</div>
+
+<div id="content">
+
+<h1>Module <code>dropbox</code></h1>
+<p>A Dropbox API v2 wrapper.</p>
+<p></p>
+    <h3>Info:</h3>
+    <ul>
+        <li><strong>Release</strong>: 0.1</li>
+        <li><strong>License</strong>: MIT</li>
+        <li><strong>Author</strong>: Louis Brauer <louis77@mac.com></li>
+    </ul>
+
+
+<h2><a href="#Functions">Functions</a></h2>
+<table class="function_list">
+	<tr>
+	<td class="name" nowrap><a href="#set_token">set_token (tk)</a></td>
+	<td class="summary">Set the access token for your Dropbox account.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#list_folder">list_folder (path, recursive, include_media_info, include_deleted)</a></td>
+	<td class="summary">List contents of a folder.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#create_folder">create_folder (path)</a></td>
+	<td class="summary">Create a folder.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#cursor">cursor (res)</a></td>
+	<td class="summary">Iterate over a folder listing.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#upload">upload (path, data)</a></td>
+	<td class="summary">Upload (create) a file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#copy">copy (from_path, to_path)</a></td>
+	<td class="summary">Copy a file.</td>
+	</tr>
+	<tr>
+	<td class="name" nowrap><a href="#delete">delete (path)</a></td>
+	<td class="summary">Delete a file or folder.</td>
+	</tr>
+</table>
+
+<br/>
+<br/>
+
+
+    <h2 class="section-header "><a name="Functions"></a>Functions</h2>
+
+    <dl class="function">
+    <dt>
+    <a name = "set_token"></a>
+    <strong>set_token (tk)</strong>
+    </dt>
+    <dd>
+    Set the access token for your Dropbox account.
+ Call this function first before you do any other calls.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">tk</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.2/manual.html#6.4">string</a></span>
+         Dropbox access token
+        </li>
+    </ul>
+
+
+
+
+
+</dd>
+    <dt>
+    <a name = "list_folder"></a>
+    <strong>list_folder (path, recursive, include_media_info, include_deleted)</strong>
+    </dt>
+    <dd>
+    List contents of a folder.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.2/manual.html#6.4">string</a></span>
+         Folder path, use empty string for ROOT level
+        </li>
+        <li><span class="parameter">recursive</span>
+            <span class="types"><span class="type">bool</span></span>
+
+        </li>
+        <li><span class="parameter">include_media_info</span>
+            <span class="types"><span class="type">bool</span></span>
+
+        </li>
+        <li><span class="parameter">include_deleted</span>
+            <span class="types"><span class="type">bool</span></span>
+
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        Raw response, pass it to cursor() to iterate and paginate over the results</li>
+        <li>
+        Error message if error occured during operation
+ otherwise you'll get only the first few hundred results</li>
+    </ol>
+
+
+    <h3>See also:</h3>
+    <ul>
+         <a href="index.html#cursor">cursor</a>
+    </ul>
+
+
+</dd>
+    <dt>
+    <a name = "create_folder"></a>
+    <strong>create_folder (path)</strong>
+    </dt>
+    <dd>
+    Create a folder.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.2/manual.html#6.4">string</a></span>
+         Folder path and name, e.g. "/Homework/NewFolder"
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        Raw response</li>
+        <li>
+        Error message if error occured during operation</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "cursor"></a>
+    <strong>cursor (res)</strong>
+    </dt>
+    <dd>
+    Iterate over a folder listing.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">res</span>
+         raw response from list_folder
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+
+        Iterable, can be used in for loops
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "upload"></a>
+    <strong>upload (path, data)</strong>
+    </dt>
+    <dd>
+    Upload (create) a file.
+ Should only be used for smaller files.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.2/manual.html#6.4">string</a></span>
+         Path of file
+        </li>
+        <li><span class="parameter">data</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.2/manual.html#6.4">string</a></span>
+         Raw contents of file, can be text or binary
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        Raw response, contains meta info about created file</li>
+        <li>
+        Error message if error occured during operation</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "copy"></a>
+    <strong>copy (from_path, to_path)</strong>
+    </dt>
+    <dd>
+    Copy a file.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">from_path</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.2/manual.html#6.4">string</a></span>
+         Source file path
+        </li>
+        <li><span class="parameter">to_path</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.2/manual.html#6.4">string</a></span>
+         Destination file path
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        Raw response</li>
+        <li>
+        Error message if error occured during operation</li>
+    </ol>
+
+
+
+
+</dd>
+    <dt>
+    <a name = "delete"></a>
+    <strong>delete (path)</strong>
+    </dt>
+    <dd>
+    Delete a file or folder.
+ Will delete all the contents in a folder along with it.
+
+
+    <h3>Parameters:</h3>
+    <ul>
+        <li><span class="parameter">path</span>
+            <span class="types"><a class="type" href="http://www.lua.org/manual/5.2/manual.html#6.4">string</a></span>
+         Folder or file path, e.g. "/Homework/Folder"
+        </li>
+    </ul>
+
+    <h3>Returns:</h3>
+    <ol>
+        <li>
+        Raw response</li>
+        <li>
+        Error message if error occured during operation</li>
+    </ol>
+
+
+
+
+</dd>
+</dl>
+
+
+</div> <!-- id="content" -->
+</div> <!-- id="main" -->
+<div id="about">
+<i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc 1.4.3</a></i>
+<i style="float:right;">Last updated 2016-02-08 12:02:41 </i>
+</div> <!-- id="about" -->
+</div> <!-- id="container" -->
+</body>
+</html>
