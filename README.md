@@ -8,8 +8,8 @@ A non-official wrapper around Dropbox API v2
 TODO
 ====
 
-- [ ] Better exception handling
-- [ ] Documentation on Uploading and Downloading files
+[ ] Better exception handling
+[ ] Documentation on Uploading and Downloading files
 
 
 Usage
@@ -37,7 +37,7 @@ The following calls to the RPC endpoints are supported and mapped 1:1 as
 described in the HTTP API documentation. The functions always return the
 original Dropbox response plus an error code, if there was an error.
 
-Please lookup the [Dropbox API doc] for the details.(https://www.dropbox.com/developers/documentation/http/documentation)
+Please lookup the [Dropbox API doc](https://www.dropbox.com/developers/documentation/http/documentation) for the details.
 
 ```lua
 list_folder         = 'files/list_folder',
