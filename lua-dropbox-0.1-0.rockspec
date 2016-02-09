@@ -17,7 +17,7 @@ description = {
 }
 dependencies = {
   "lua >= 5.1",
-  "lua-requests-https >= 1.1"
+  "lua-requests >= 1.1"
 }
 
 build = {

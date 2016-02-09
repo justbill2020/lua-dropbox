@@ -1,38 +1,44 @@
 require 'busted.runner'()
 local pp = require('../src/pprint')
 
-describe("Dropbox", function()
+describe("Dropbox RPC calls", function()
   local dropbox
 
   setup(function()
     dropbox = require('../src/dropbox')
-    dropbox.set_token (os.getenv("DROPBOX_TOKEN")) 
+    dropbox.set_token (os.getenv("DROPBOX_TOKEN"))
   end)
 
   describe("#folders", function()
     local fname = '/a_testfolder'
 
     it("can be created", function()
-      local result, err = dropbox.create_folder(fname)
+      local result, err = dropbox.create_folder{path=fname}
       assert.falsy(err)
       assert.is.equal(string.lower(fname), result.path_lower)
     end)
 
     it("yields #error if created without a name", function()
-      local result, err = dropbox.create_folder("")
+      local result, err = dropbox.create_folder{path=""}
       assert.truthy(err)
     end)
 
-    it("can be listed", function()
-      local result = dropbox.list_folder(fname)
+    it("can be listed #magically", function()
+      local result = dropbox.list_folder{path=fname}
       assert.is.truthy(result.entries)
       assert.is.equal(0, #result.entries)
     end)
 
     it("can be deleted", function()
-      local result = dropbox.delete(fname)
+      local result = dropbox.delete{path=fname}
       assert.is.equal("folder", result[".tag"])
       assert.is.equal(string.lower(fname), result.path_lower)
+    end)
+
+    it("doesn't accept unknown RPC calls", function()
+      assert.has_error(function()
+        local _ = dropbox.list_something()
+      end)
     end)
   end)
 
@@ -42,7 +48,7 @@ describe("Dropbox", function()
     local content = "This is the content of the text file"
 
     teardown(function()
-      local result = dropbox.delete(fname_copy)
+      local result = dropbox.delete{path=fname_copy}
     end)
 
     it("can be created with a string", function()
@@ -52,15 +58,28 @@ describe("Dropbox", function()
     end)
 
     it("can be copied", function()
-      local result = dropbox.copy(fname, fname_copy)
+      local result = dropbox.copy{from_path=fname, to_path=fname_copy}
       assert.is.equal("file", result[".tag"])
       assert.is.equal(string.lower(fname_copy), result.path_lower)
     end)
 
+    it("can be downloaded", function()
+      local data, meta, err = dropbox.download{path=fname}
+      assert.is.equal(content, data)
+      assert.is.same(#content, meta.size)
+    end)
+
     it("can be deleted", function()
-      local result = dropbox.delete(fname)
+      local result = dropbox.delete{path=fname}
       assert.is.equal("file", result[".tag"])
       assert.is.equal(string.lower(fname), result.path_lower)
+    end)
+  end)
+
+  describe("#users", function()
+    it("can get current account info", function()
+      local result, err = dropbox.get_current_account()
+      assert.is.truthy(result.email)
     end)
   end)
 

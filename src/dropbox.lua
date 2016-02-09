@@ -7,6 +7,7 @@
 -- https://github.com/JakobGreen/lua-requests/wiki
 local requests = require 'requests'
 local json = require 'cjson.safe'
+-- https://github.com/jagt/pprint.lua
 local pp = require 'pprint'
 
 local M = {}
@@ -15,6 +16,45 @@ local M = {}
 
 local DROPBOX_RPC_ENDPOINT = 'https://api.dropboxapi.com/2/'
 local DROPBOX_CONTENT_ENDPOINT = 'https://content.dropboxapi.com/2/'
+local RPC_CALLS = {
+  -- files
+  list_folder         = 'files/list_folder',
+  create_folder       = 'files/create_folder',
+  copy                = 'files/copy',
+  delete              = 'files/delete',
+  get_metadata        = 'files/get_metadata',
+  list_revisions      = 'files/list_revisions',
+  move                = 'files/move',
+  permanently_delete  = 'files/permanently_delete',
+  restore             = 'files/restore',
+  search              = 'files/search',
+  -- sharing
+  add_folder_member                 = 'sharing/add_folder_member',
+  check_job_status                  = 'sharing/check_job_status',
+  check_share_job_status            = 'sharing/check_share_job_status',
+  create_shared_link_with_settings  = 'sharing/create_shared_link_with_settings',
+  get_folder_metadata               = 'sharing/get_folder_metadata',
+  get_shared_link_metadata          = 'sharing/get_shared_link_metadata',
+  list_folder_members               = 'sharing/list_folder_members',
+  list_folders                      = 'sharing/list_folders',
+  list_shared_links                 = 'sharing/list_shared_links',
+  modify_shared_link_settings       = 'sharing/modify_shared_link_settings',
+  mount_folder                      = 'sharing/mount_folder',
+  relinquish_folder_membership      = 'sharing/relinquish_folder_membership',
+  remove_folder_member              = 'sharing/remove_folder_member',
+  revoke_shared_link                = 'sharing/revoke_shared_link',
+  share_folder                      = 'sharing/share_folder',
+  transfer_folder                   = 'sharing/transfer_folder',
+  unmount_folder                    = 'sharing/unmount_folder',
+  unshare_folder                    = 'sharing/unshare_folder',
+  update_folder_member              = 'sharing/update_folder_member',
+  update_folder_policy              = 'sharing/update_folder_policy',
+  -- users
+  get_account         = 'users/get_account',
+  get_account_batch   = 'users/get_account_batch',
+  get_current_account = 'users/get_current_account',
+  get_space_usage     = 'users/get_space_usage'
+}
 
 -- Module vars
 
@@ -23,7 +63,7 @@ local token
 -- Private functions
 
 local function add_auth(tbl)
-  tbl["Authorization"] = "Bearer "..token
+  tbl["Authorization"] = "Bearer " .. token
   return tbl
 end
 
@@ -32,13 +72,15 @@ local function json_resp(response)
   if response.status_code >= 400 then
     err = response.text
   end
-  return response.json(), err
+  local result = response.headers['dropbox-api-result'] and json.decode(response.headers['dropbox-api-result']) or response.json()
+  return result, err
 end
 
 local function make_rpc_request(reqfunc, endpoint, data)
-  local headers = add_auth{
-    ["Content-Type"] = 'application/json'
-  }
+  local headers = add_auth{}
+  if data then
+    headers["Content-Type"] = 'application/json'
+  end
   local response = reqfunc(DROPBOX_RPC_ENDPOINT .. endpoint, {
     headers = headers,
     data = data
@@ -46,16 +88,42 @@ local function make_rpc_request(reqfunc, endpoint, data)
   return json_resp(response)
 end
 
-local function make_content_request(reqfunc, endpoint, data, content)
+local function make_content_upload_request(reqfunc, endpoint, data, content)
   local headers = add_auth{
-    ["Content-Type"] = 'application/octet-stream',
-    ["Dropbox-API-Arg"] = json.encode(data)
+    ["Dropbox-API-Arg"] = json.encode(data),
+    ["Content-Type"] = 'application/octet-stream'
   }
   local response = reqfunc(DROPBOX_CONTENT_ENDPOINT .. endpoint, {
     headers = headers,
     data = content
   })
   return json_resp(response)
+end
+
+local function make_content_download_request(reqfunc, endpoint, data)
+  local headers = add_auth{
+    ["Dropbox-API-Arg"] = json.encode(data)
+  }
+  local response = reqfunc(DROPBOX_CONTENT_ENDPOINT .. endpoint, {
+    headers = headers
+  })
+  return response.text, json_resp(response)
+end
+
+
+local magic_calls_mt = {}
+magic_calls_mt.__index = function(_, w)
+    local call = RPC_CALLS[w]
+    if not call then
+      error("Unknown API method '"..w.."'")
+    end
+    return function(args) return make_rpc_request(requests.post, call, args) end
+end
+setmetatable(M, magic_calls_mt)
+
+
+local function list_folder_continue(cursor)
+  return make_rpc_request(requests.post, 'files/list_folder/continue', {cursor=cursor})
 end
 
 -- Public functions
@@ -67,44 +135,6 @@ function M.set_token(tk)
   token = tk
 end
 
---- List contents of a folder.
--- @string path Folder path, use empty string for ROOT level
--- @bool recursive
--- @bool include_media_info
--- @bool include_deleted
--- @see cursor
--- @return Raw response, pass it to cursor() to iterate and paginate over the results
--- @return Error message if error occured during operation
--- otherwise you'll get only the first few hundred results
-function M.list_folder(path, recursive, include_media_info, include_deleted)
-  -- https://www.dropbox.com/developers/documentation/http/documentation#files-list_folder
-  local message = {
-    path = path,
-    recursive = recursive,
-    include_media_info = include_media_info,
-    include_deleted = include_deleted
-  }
-  return make_rpc_request(requests.post, 'files/list_folder', message)
-end
-
-local function list_folder_continue(cursor)
-  -- https://www.dropbox.com/developers/documentation/http/documentation#files-list_folder-continue
-  local message = {
-    cursor = cursor
-  }
-  return make_rpc_request(requests.post, 'files/list_folder/continue', message)
-end
-
---- Create a folder.
--- @string path Folder path and name, e.g. "/Homework/NewFolder"
--- @return Raw response
--- @return Error message if error occured during operation
-function M.create_folder(path)
-  local message = {
-    path = path
-  }
-  return make_rpc_request(requests.post, 'files/create_folder', message)
-end
 
 --- Iterate over a folder listing.
 -- @param res raw response from list_folder
@@ -127,45 +157,60 @@ end
 --- Upload (create) a file.
 -- Should only be used for smaller files.
 -- @string path Path of file
--- @string data Raw contents of file, can be text or binary
+-- @string data String or file handle
 -- @return Raw response, contains meta info about created file
 -- @return Error message if error occured during operation
-function M.upload(path, data)
-  -- https://www.dropbox.com/developers/documentation/http/documentation#files-upload
-  -- TODO This function should only be used for small files,
-  --      Dropbox limit 150 MB
+function M.upload(path, data, overwrite)
+  local body = data
   local message = {
     path = path,
-    mode = "add",
-    autorename = true,
+    mode = overwrite and "overwrite" or "add",
+    autorename = false,
     mute = false
   }
-  return make_content_request(requests.post, 'files/upload', message, data)
+  if type(data) == 'userdata' and io.type(data) == 'file' then
+    body = data:read("*a")
+  end
+  local result = make_content_upload_request(requests.post, 'files/upload', message, body)
+  return result
 end
 
---- Copy a file.
--- @string from_path Source file path
--- @string to_path Destination file path
--- @return Raw response
--- @return Error message if error occured during operation
-function M.copy(from_path, to_path)
-  local message = {
-    from_path = from_path,
-    to_path = to_path
-  }
-  return make_rpc_request(requests.post, 'files/copy', message)
+function M.upload_session_start(chunk)
+  return make_content_upload_request(requests.post, 'files/upload_session/start', nil, chunk)
 end
 
---- Delete a file or folder.
--- Will delete all the contents in a folder along with it.
--- @string path Folder or file path, e.g. "/Homework/Folder"
--- @return Raw response
--- @return Error message if error occured during operation
-function M.delete(path)
+function M.upload_session_append(session_id, offset, chunk)
   local message = {
-    path = path
+    session_id = session_id,
+    offset = offset
   }
-  return make_rpc_request(requests.post, 'files/delete', message)
+  return make_content_upload_request(requests.post, 'files/upload_session/append', message, chunk)
+end
+
+function M.upload_session_finish(session_id, offset, path, overwrite, chunk)
+  local message = {
+    cursor = {
+      session_id = session_id,
+      offset = offset
+    },
+    commit = {
+      path = path,
+      mode = overwrite and "overwrite" or "add",
+      autorename = false,
+      mute = false
+    }
+  }
+  return make_content_upload_request(requests.post, 'files/upload_session/finish', message, chunk)
+end
+
+--- Download file contents.
+-- Should only be used for smaller files. Full file content is stores in a string.
+-- @string path Path of file
+-- @return File content
+-- @return File meta info
+-- @return Error message if error occured during operation
+function M.download(path)
+  return make_content_download_request(requests.get, 'files/download', path)
 end
 
 return M
